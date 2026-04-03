@@ -1,0 +1,99 @@
+<div class="layout">
+  <header class="top-bar">
+    <div class="brand">
+      <strong>Tasks</strong>
+      @if (auth.currentUser(); as u) {
+        <span class="user-pill">{{ u.userName }}</span>
+      }
+    </div>
+    <button type="button" class="ghost" (click)="auth.logout()">Sign out</button>
+  </header>
+
+  <div class="split">
+    <section class="panel list-panel">
+      <div class="toolbar">
+        <input
+          type="search"
+          class="search"
+          placeholder="Search title…"
+          [value]="search()"
+          (input)="onSearchInput($any($event.target).value)"
+        />
+        <div class="chips">
+          <button type="button" [class.on]="filter() === 'all'" (click)="setFilter('all')">All</button>
+          <button type="button" [class.on]="filter() === 'active'" (click)="setFilter('active')">Active</button>
+          <button type="button" [class.on]="filter() === 'completed'" (click)="setFilter('completed')">Done</button>
+        </div>
+        <label class="sort">
+          Sort
+          <select [ngModel]="sortBy()" (ngModelChange)="setSort($event)">
+            <option value="updated">Last updated</option>
+            <option value="created">Created</option>
+            <option value="due">Due date</option>
+            <option value="title">Title</option>
+            <option value="completed">Completed</option>
+          </select>
+        </label>
+      </div>
+
+      @if (loading()) {
+        <p class="muted center">Loading…</p>
+      } @else if (displayedTasks().length === 0) {
+        <p class="muted center">No tasks match your filters.</p>
+      } @else {
+        <ul class="task-list">
+          @for (t of displayedTasks(); track t.id) {
+            <li
+              class="task-row"
+              [class.selected]="selectedId() === t.id"
+              [class.done]="t.isCompleted"
+              (click)="selectTask(t)"
+            >
+              <label class="check" (click)="toggleRow(t, $event)">
+                <input type="checkbox" [checked]="t.isCompleted" (click)="$event.preventDefault()" />
+              </label>
+              <div class="task-main">
+                <span class="task-title">{{ t.title }}</span>
+                @if (t.dueDate) {
+                  <span class="task-meta">Due {{ t.dueDate | date: 'mediumDate' }}</span>
+                }
+              </div>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+
+    <section class="panel detail-panel">
+      <div class="detail-head">
+        <h2>{{ selectedId() ? 'Edit task' : 'New task' }}</h2>
+        <button type="button" class="ghost" (click)="newTask()">New</button>
+      </div>
+
+      <form class="detail-form" (ngSubmit)="save()">
+        <label class="field">
+          <span>Title</span>
+          <input name="title" [(ngModel)]="formTitle" required />
+        </label>
+        <label class="field">
+          <span>Description</span>
+          <textarea name="description" rows="4" [(ngModel)]="formDescription"></textarea>
+        </label>
+        <label class="field">
+          <span>Due date</span>
+          <input name="due" type="date" [(ngModel)]="formDue" />
+        </label>
+        <label class="inline">
+          <input type="checkbox" [(ngModel)]="formCompleted" name="completed" />
+          Completed
+        </label>
+        <div class="actions">
+          <button type="submit" class="primary" [disabled]="saving()">{{ saving() ? 'Saving…' : 'Save' }}</button>
+          @if (selectedId()) {
+            <button type="button" class="danger" (click)="deleteSelected()" [disabled]="saving()">Delete</button>
+          }
+        </div>
+      </form>
+    </section>
+  </div>
+</div>

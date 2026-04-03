@@ -1,0 +1,7 @@
+@if (messages.text(); as msg) {
+  <div class="banner" [class.banner-error]="messages.kind() === 'error'" [class.banner-success]="messages.kind() === 'success'">
+    <span>{{ msg }}</span>
+    <button type="button" class="banner-close" (click)="messages.clear()" aria-label="Dismiss">×</button>
+  </div>
+}
+<router-outlet />

@@ -1,0 +1,29 @@
+<div class="auth-page">
+  <div class="auth-card">
+    <h1>Task Manager</h1>
+    <p class="subtitle">Sign in to manage your tasks</p>
+
+    <div class="tabs">
+      <button type="button" class="tab" [class.active]="mode === 'login'" (click)="setMode('login')">Sign in</button>
+      <button type="button" class="tab" [class.active]="mode === 'register'" (click)="setMode('register')">Register</button>
+    </div>
+
+    <form (ngSubmit)="submit()" class="form">
+      <label class="field">
+        <span>Username</span>
+        <input name="userName" [(ngModel)]="userName" autocomplete="username" required />
+      </label>
+      @if (mode === 'register') {
+        <label class="field">
+          <span>Email</span>
+          <input name="email" type="email" [(ngModel)]="email" autocomplete="email" />
+        </label>
+      }
+      <label class="field">
+        <span>Password</span>
+        <input name="password" type="password" [(ngModel)]="password" autocomplete="current-password" required />
+      </label>
+      <button type="submit" class="primary" [disabled]="busy">{{ busy ? 'Please wait…' : mode === 'login' ? 'Sign in' : 'Create account' }}</button>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,28 @@
+@TaskManagerApi_HostAddress = http://localhost:5133
+
+### Register (then cookie is set for subsequent calls in compatible clients)
+POST {{TaskManagerApi_HostAddress}}/api/Auth/register
+Content-Type: application/json
+
+{
+  "userName": "demo",
+  "email": "demo@example.com",
+  "password": "Passw0rd!"
+}
+
+###
+POST {{TaskManagerApi_HostAddress}}/api/Auth/login
+Content-Type: application/json
+
+{
+  "userName": "demo",
+  "password": "Passw0rd!"
+}
+
+###
+GET {{TaskManagerApi_HostAddress}}/api/Auth/me
+
+###
+GET {{TaskManagerApi_HostAddress}}/api/Tasks
+
+###

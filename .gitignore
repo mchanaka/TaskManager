@@ -1,0 +1,18 @@
+# .NET
+**/bin/
+**/obj/
+*.user
+*.suo
+.vs/
+
+# Node / Angular
+**/node_modules/
+**/dist/
+**/.angular/
+npm-debug.log*
+
+# IDE / OS
+.idea/
+*.swp
+Thumbs.db
+.DS_Store
