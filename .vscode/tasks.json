@@ -1,0 +1,37 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "LocalDB: start (mssqllocaldb)",
+      "type": "shell",
+      "command": "powershell -NoProfile -ExecutionPolicy Bypass -File ./scripts/ensure-localdb.ps1",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Backend: dotnet run (after LocalDB)",
+      "type": "shell",
+      "command": "dotnet run --project ./backend/TaskManagerApi.csproj",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": ["LocalDB: start (mssqllocaldb)"],
+      "dependsOrder": "sequence",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using TaskManagerApi.Data;
 using TaskManagerApi.Middleware;
@@ -68,7 +69,26 @@ app.MapControllers();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    await db.Database.MigrateAsync();
+    try
+    {
+        await db.Database.MigrateAsync();
+    }
+    catch (SqlException ex) when (ex.Number == 52 || ex.Message.Contains("Local Database Runtime", StringComparison.OrdinalIgnoreCase))
+    {
+        Console.ForegroundColor = ConsoleColor.Yellow;
+        Console.Error.WriteLine();
+        Console.Error.WriteLine("Database: LocalDB is not installed (SQL error 52).");
+        Console.Error.WriteLine("Fix one of:");
+        Console.Error.WriteLine("  1) Install SQL Server Express LocalDB:");
+        Console.Error.WriteLine("     https://go.microsoft.com/fwlink/?LinkID=799012");
+        Console.Error.WriteLine("  2) Or run an elevated PowerShell (Run as Administrator):");
+        Console.Error.WriteLine("     winget install Microsoft.SQLServer.2022.Express");
+        Console.Error.WriteLine("     (in the installer, include the LocalDB feature if prompted.)");
+        Console.Error.WriteLine("  3) Or change ConnectionStrings:DefaultConnection in appsettings to a full SQL Server instance.");
+        Console.Error.WriteLine();
+        Console.ResetColor();
+        Environment.Exit(1);
+    }
 }
 
 app.Run();

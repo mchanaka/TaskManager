@@ -14,16 +14,37 @@ Full-stack task management sample: **ASP.NET Core 8 Web API**, **Angular 19**, a
 - `frontend/` — Angular SPA (`task-manager-ui`)
 - `database/schema.sql` — idempotent SQL script generated from EF Core migrations (optional if you use `dotnet ef database update` instead)
 
-## Database connection
+## Database connection (LocalDB by default)
 
-Edit [backend/appsettings.json](backend/appsettings.json) `ConnectionStrings:DefaultConnection`.
+The repo defaults to **SQL Server LocalDB** (`Server=(localdb)\\mssqllocaldb`) in [backend/appsettings.json](backend/appsettings.json).
 
-Examples:
+**If you see error 52 (“Unable to locate a Local Database Runtime”)**, install LocalDB, then **restart Cursor** (or open a new terminal) so `sqllocaldb` is on PATH:
 
-- **LocalDB (default in repo):**  
-  `Server=(localdb)\\mssqllocaldb;Database=TaskManagerDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True`
-- **SQL Server / Express (named instance):**  
-  `Server=.\\SQLEXPRESS;Database=TaskManagerDb;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True`
+- Download **SQL Server Express** and include **LocalDB**, or install the **LocalDB** package: [Microsoft SQL Server Express LocalDB](https://go.microsoft.com/fwlink/?LinkID=799012)  
+- Optional (Windows): `winget install Microsoft.SQLServer.2022.Express` — in the installer, include the **LocalDB** feature if offered.
+
+Verify in a terminal:
+
+```powershell
+sqllocaldb info
+sqllocaldb start mssqllocaldb
+```
+
+Or run [scripts/ensure-localdb.ps1](scripts/ensure-localdb.ps1) — it starts the default instance and prints errors if LocalDB is missing.
+
+To use a full SQL Server instance instead, edit `ConnectionStrings:DefaultConnection` (for example `Server=localhost` or `Server=localhost\\SQLEXPRESS`).
+
+## Cursor / VS Code
+
+Open the **repository root** (`TaskManager`) as the workspace folder so `.vscode/tasks.json` is used.
+
+1. Install **LocalDB** (see above).
+2. **Run the API with LocalDB started first:**  
+   **Terminal → Run Task…** → **“Backend: dotnet run (after LocalDB)”**  
+   or press **Ctrl+Shift+B** (default build task runs LocalDB, then `dotnet run`).
+3. You can also run **`.\scripts\ensure-localdb.ps1`** manually in the integrated terminal, then `cd backend` and **`dotnet run`**.
+
+Cursor uses the same tasks and terminal behavior as VS Code for this setup.
 
 On first run, the API applies pending EF Core migrations automatically (`MigrateAsync` in `Program.cs`).
 
@@ -42,7 +63,10 @@ dotnet ef migrations script --idempotent -o ../database/schema.sql
 
 ## Run the API
 
-```bash
+With LocalDB, start the instance first (see **Cursor / VS Code** above), or:
+
+```powershell
+.\scripts\ensure-localdb.ps1
 cd backend
 dotnet run
 ```
