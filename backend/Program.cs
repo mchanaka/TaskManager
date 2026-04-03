@@ -77,14 +77,9 @@ using (var scope = app.Services.CreateScope())
     {
         Console.ForegroundColor = ConsoleColor.Yellow;
         Console.Error.WriteLine();
-        Console.Error.WriteLine("Database: LocalDB is not installed (SQL error 52).");
-        Console.Error.WriteLine("Fix one of:");
-        Console.Error.WriteLine("  1) Install SQL Server Express LocalDB:");
-        Console.Error.WriteLine("     https://go.microsoft.com/fwlink/?LinkID=799012");
-        Console.Error.WriteLine("  2) Or run an elevated PowerShell (Run as Administrator):");
-        Console.Error.WriteLine("     winget install Microsoft.SQLServer.2022.Express");
-        Console.Error.WriteLine("     (in the installer, include the LocalDB feature if prompted.)");
-        Console.Error.WriteLine("  3) Or change ConnectionStrings:DefaultConnection in appsettings to a full SQL Server instance.");
+        Console.Error.WriteLine("Database connection failed (SQL error 52).");
+        Console.Error.WriteLine("Make sure SQL Server Express is installed, running, and reachable.");
+        Console.Error.WriteLine("If your SQL Server Express instance name differs, update ConnectionStrings:DefaultConnection in backend/appsettings.json.");
         Console.Error.WriteLine();
         Console.ResetColor();
         Environment.Exit(1);
