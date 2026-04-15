@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using TaskManagerApi.Data;
+using TaskManagerApi.Gateways;
 using TaskManagerApi.Middleware;
 using TaskManagerApi.Models;
 
@@ -52,6 +53,7 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddHttpClient<IExternalApiGateway, ExternalApiGateway>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddControllers();
