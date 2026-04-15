@@ -1,35 +1,21 @@
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using TaskManagerApi.DTOs;
-using TaskManagerApi.Models;
+using TaskManagerApi.Services;
 
 namespace TaskManagerApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class AuthController : ControllerBase
+public class AuthController(IAuthService authService) : ControllerBase
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly SignInManager<ApplicationUser> _signInManager;
-
-    public AuthController(
-        UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager)
-    {
-        _userManager = userManager;
-        _signInManager = signInManager;
-    }
-
     [HttpPost("register")]
     [AllowAnonymous]
     public async Task<ActionResult> Register([FromBody] RegisterRequest request, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid)
-            return ValidationProblem(ModelState);
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
-        var user = new ApplicationUser { UserName = request.UserName, Email = request.Email };
-        var result = await _userManager.CreateAsync(user, request.Password);
+        var (result, user) = await authService.RegisterAsync(request);
         if (!result.Succeeded)
         {
             foreach (var error in result.Errors)
@@ -37,38 +23,27 @@ public class AuthController : ControllerBase
             return ValidationProblem(ModelState);
         }
 
-        await _signInManager.SignInAsync(user, isPersistent: true);
-        return Ok(new UserInfoResponse { UserName = user.UserName!, Email = user.Email! });
+        return Ok(user);
     }
 
     [HttpPost("login")]
     [AllowAnonymous]
     public async Task<ActionResult> Login([FromBody] LoginRequest request, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid)
-            return ValidationProblem(ModelState);
+        if (!ModelState.IsValid) return ValidationProblem(ModelState);
 
-        var user = await _userManager.FindByNameAsync(request.UserName);
+        var user = await authService.LoginAsync(request);
         if (user is null)
-            return Unauthorized(CreateProblem("Invalid username or password."));
+            return Unauthorized(new ProblemDetails { Title = "Authentication failed", Detail = "Invalid username or password.", Status = StatusCodes.Status401Unauthorized });
 
-        var result = await _signInManager.PasswordSignInAsync(
-            user,
-            request.Password,
-            isPersistent: true,
-            lockoutOnFailure: false);
-
-        if (!result.Succeeded)
-            return Unauthorized(CreateProblem("Invalid username or password."));
-
-        return Ok(new UserInfoResponse { UserName = user.UserName!, Email = user.Email! });
+        return Ok(user);
     }
 
     [HttpPost("logout")]
     [Authorize]
     public async Task<IActionResult> Logout()
     {
-        await _signInManager.SignOutAsync();
+        await authService.LogoutAsync();
         return NoContent();
     }
 
@@ -76,13 +51,8 @@ public class AuthController : ControllerBase
     [Authorize]
     public async Task<ActionResult<UserInfoResponse>> Me(CancellationToken cancellationToken)
     {
-        var user = await _userManager.GetUserAsync(User);
-        if (user is null)
-            return Unauthorized();
-
-        return Ok(new UserInfoResponse { UserName = user.UserName!, Email = user.Email! });
+        var user = await authService.GetCurrentUserAsync(User);
+        if (user is null) return Unauthorized();
+        return Ok(user);
     }
-
-    private static ProblemDetails CreateProblem(string detail) =>
-        new() { Title = "Authentication failed", Detail = detail, Status = StatusCodes.Status401Unauthorized };
 }

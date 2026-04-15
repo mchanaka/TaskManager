@@ -5,6 +5,7 @@ using TaskManagerApi.Data;
 using TaskManagerApi.Gateways;
 using TaskManagerApi.Middleware;
 using TaskManagerApi.Models;
+using TaskManagerApi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -54,6 +55,8 @@ builder.Services.AddCors(options =>
 });
 
 builder.Services.AddHttpClient<IExternalApiGateway, ExternalApiGateway>();
+builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ITaskService, TaskService>();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddControllers();
